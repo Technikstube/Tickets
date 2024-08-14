@@ -23,11 +23,20 @@ class Commands(commands.Cog):
 
         await interaction.response.send_message("Dieser Kanal ist kein Ticket.", ephemeral=True, delete_after=3)
 
-    @app_commands.command(name="send_ticket_message", description="Close a Ticket")
+    @app_commands.command(name="send_ticket_message", description="Send the Ticket Message")
     @commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     async def send_message_command(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Platzhirsch", view=StartTicketView(self.bot))
+        
+        embed = discord.Embed(
+            color=discord.Color.blue(),
+            title="",
+            description="Klicke auf **`Ticket öffnen`** um ein Ticket zu erstellen."
+        )
+        embed.set_author(name="Ticket erstellen", icon_url=self.bot.user.avatar.url)
+        
+        await interaction.channel.send(embed=embed, view=StartTicketView(self.bot))
+        await interaction.response.send_message("Nachricht erstellt!", ephemeral=True, delete_after=5)
 
 
     @app_commands.command(name="set_category", description="Set the Ticket-Category")
