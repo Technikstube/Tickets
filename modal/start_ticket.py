@@ -51,7 +51,7 @@ class StartTicketModal(ui.Modal):
         
         category = self.bot.get_channel(int(conf["ticket_category"]))
         channel = await category.create_text_channel(f"ticket-{interaction.user.name}")
-        channel.edit(sync_permissions=True, overwrites=overwrite)
+        channel.edit(overwrites=overwrite)
         await channel.move(beginning=True)
         
         tickets[str(interaction.user.id)] = {
