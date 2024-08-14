@@ -38,6 +38,27 @@ class Commands(commands.Cog):
         await interaction.channel.send(embed=embed, view=StartTicketView(self.bot))
         await interaction.response.send_message("Nachricht erstellt!", ephemeral=True, delete_after=5)
 
+    @app_commands.command(name="set_role", description="Set the Staff Role")
+    @commands.guild_only()
+    @app_commands.default_permissions(manage_guild=True)
+    async def staff_role_command(self, interaction: discord.Interaction, role_id: str):
+        conf = Config().get()
+        
+        if role_id == "unset":
+            conf["staff_role"] = None
+            Config().save(conf)
+            await interaction.response.send_message("Staff Rolle entfernt.", ephemeral=True)
+            return
+        
+        _role = interaction.guild.get_role(int(role_id))
+        
+        if not isinstance(_role, discord.Role):
+            await interaction.response.send_message("Das ist keine Rolle.", ephemeral=True)
+        
+        conf["staff_role"] = role_id
+        Config().save(conf)
+        
+        await interaction.response.send_message(f"Ticket-Kategorie zu {_role.mention} gesetzt.", ephemeral=True)
 
     @app_commands.command(name="set_category", description="Set the Ticket-Category")
     @commands.guild_only()

@@ -46,12 +46,27 @@ class StartTicketModal(ui.Modal):
             await interaction.response.send_message("Du hast bereits ein Ticket.", ephemeral=True, delete_after=3)
             return
         
-        overwrite = discord.PermissionOverwrite()
-        overwrite.view_channel = True
+        category = interaction.guild.get_channel(int(conf["ticket_category"])) if "ticket_category" in conf else None
+        staff = interaction.guild.get_role(int(conf["staff_role"])) if "staff_role" in conf else None
+        guild = interaction.guild
+        user = interaction.user
         
-        category = self.bot.get_channel(int(conf["ticket_category"]))
-        channel = await category.create_text_channel(f"ticket-{interaction.user.name}")
-        channel.edit(overwrites=overwrite)
+        overwrite = discord.PermissionOverwrite()
+        overwrite.read_messages = True
+        
+        standard_overwrite = discord.PermissionOverwrite()
+        standard_overwrite.send_messages = True
+        standard_overwrite.read_messages = False
+        
+        channel = await guild.create_text_channel(
+            name=f"ticket-{user.name}",
+            category=category,
+            overwrites={
+                user: overwrite,
+                staff: overwrite,
+                guild.default_role: standard_overwrite
+            }
+            )
         await channel.move(beginning=True)
         
         tickets[str(interaction.user.id)] = {
