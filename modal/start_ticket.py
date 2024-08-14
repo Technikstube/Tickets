@@ -83,8 +83,8 @@ class StartTicketModal(ui.Modal):
         user_embed.set_author(name=interaction.user.display_name, icon_url=interaction.user.avatar.url if interaction.user.avatar is not None else interaction.user.default_avatar.url)
         
         await interaction.response.send_message(f"Ticket erstellt {channel.mention}", ephemeral=True, delete_after=15)
-        msg = await channel.send(f"<a:loading:1272649967936471202> | {interaction.user.mention} <@&1139638391684726884>")
-        await msg.edit(content=f"{interaction.user.mention} <@&1139638391684726884>", embed=embed, view=CloseView(self.bot, msg))
+        msg = await channel.send(f"<a:loading:1272649967936471202> | {interaction.user.mention} <@&1205201637577068605>")
+        await msg.edit(content=f"{interaction.user.mention} <@&1205201637577068605>", embed=embed, view=CloseView(self.bot, msg))
         await msg.pin()
         await channel.purge(limit=1)
         await channel.send(embed=user_embed)
