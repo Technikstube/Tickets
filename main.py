@@ -3,6 +3,7 @@ import os
 import sys
 import asyncio
 import signal
+import sentry_sdk
 import random
 from dotenv import get_key
 from datetime import datetime
@@ -12,6 +13,8 @@ from utility import Ticket, Config
 from view.close import CloseView
 from view.start_ticket import StartTicketView
 from modal.start_ticket import StartTicketModal
+
+sentry_sdk.init("http://ca1217fce7644447860bace472887020@192.168.2.99:8000/3")
 
 intents = discord.Intents.default()
 intents.members = True
