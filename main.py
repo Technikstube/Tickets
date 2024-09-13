@@ -139,7 +139,7 @@ class Tickets(commands.Bot):
 # Shutdown Handler
 def shutdown_handler(signum, frame):
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(Tickets().logout())
+    
     # Cancel all tasks lingering
     tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
 
