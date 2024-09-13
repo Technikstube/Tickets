@@ -56,7 +56,7 @@ class YouSureView(ui.View):
         await interaction.channel.delete()
         if member is not None:
             with open(f"configuration/{transcript}", "rb") as f:
-                embed = discord.Embed(title="", description=f"{interaction.channel.name} wurde von {interaction.user.mention} geschlossen.", color=discord.Color.blue())
+                embed = discord.Embed(title="", description=f"Dein Ticket wurde von {interaction.user.mention} geschlossen.", color=discord.Color.blue())
                 await member.send(embed=embed, file=discord.File(f))
         if "transcript_channel" in conf:
             tc = self.bot.get_channel(int(conf["transcript_channel"]))
