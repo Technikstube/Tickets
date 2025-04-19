@@ -3,7 +3,7 @@ type: docker
 name: deployment
 
 clone:
-  disable: false
+  disable: true
 
 steps:
 
