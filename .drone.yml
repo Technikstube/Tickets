@@ -41,7 +41,9 @@ steps:
     DOCKER_HOST: tcp://192.168.2.10:2375
   commands:
   - docker stop tickets
+  - docker stop boxsrv_tickets 
   - docker rm tickets
+  - docker rm boxsrv_tickets 
   when:
     event:
     - pull_request

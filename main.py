@@ -96,7 +96,7 @@ class Tickets(commands.Bot):
             discord.Activity(
                 type=discord.ActivityType.watching, name="Tickets"
             ),
-            discord.CustomActivity(name="Technikstube Support")
+            discord.CustomActivity(name="Writing Transcripts")
         ]
 
         await self.change_presence(
