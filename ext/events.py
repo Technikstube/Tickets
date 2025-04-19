@@ -61,7 +61,7 @@ class Events(commands.Cog):
         with open(f"configuration/{tickets[str(ticket)].get("transcript")}", "a") as f:
             date = datetime.now()
             f.write(
-                f"{date.day}.{date.month}.{str(date.year)[2:]}, {date.hour}:{date.minute}:{date.second} | [Editiert] {after.author.name}: {after.content}\n    vorher: {before.content}\n"
+                f"{date.day}.{date.month}.{str(date.year)[2:]}, {date.hour}:{date.minute}:{date.second} | [Edited] {after.author.name}: {after.content}\n    before: {before.content}\n"
             )
                     
     @commands.Cog.listener(name="on_member_remove")
@@ -80,7 +80,7 @@ class Events(commands.Cog):
                 if "transcript_channel" in conf:
                     tc = self.bot.get_channel(int(conf["transcript_channel"]))
                     with open(f"configuration/{transcript}", "rb") as f:
-                        embed = discord.Embed(title="", description=f"{channel.name} wurde von {self.bot.user.mention} geschlossen. (Nutzer hat den Server verlassen)", color=discord.Color.blue())
+                        embed = discord.Embed(title="", description=f"{channel.name} was closed by {self.bot.user.mention} (User left the server)", color=discord.Color.blue())
                         await tc.send(embed=embed, file=discord.File(f))
                     os.remove(f"./configuration/{transcript}")
                 break

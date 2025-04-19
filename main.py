@@ -54,14 +54,14 @@ class Tickets(commands.Bot):
                 
                 if member is not None:
                     with open(f"configuration/{transcript}", "rb") as f:
-                        embed = discord.Embed(title="", description=f"{channel.name} wurde von {self.user.mention} geschlossen.", color=discord.Color.blue())
+                        embed = discord.Embed(title="", description=f"{channel.name} was closed by {self.user.mention}.", color=discord.Color.blue())
                         await member.send(embed=embed, file=discord.File(f))
                 Ticket().save(tickets)
                 await channel.delete()
                 if "transcript_channel" in conf:
                     tc = self.get_channel(int(conf["transcript_channel"]))
                     with open(f"configuration/{transcript}", "rb") as f:
-                        embed = discord.Embed(title="", description=f"{channel.name} wurde von {self.user.mention} geschlossen.", color=discord.Color.blue())
+                        embed = discord.Embed(title="", description=f"{channel.name} was closed by {self.user.mention}.", color=discord.Color.blue())
                         await tc.send(embed=embed, file=discord.File(f))
                     os.remove(f"./configuration/{transcript}")
                 continue
@@ -72,7 +72,7 @@ class Tickets(commands.Bot):
         tickets = Ticket().get()
         
         stale_embed = discord.Embed(title="",
-                                    description="<:uncheck:1226665497701912728> Ticket als `Inaktiv` markiert.",
+                                    description="<:uncheck:1226665497701912728> Ticket marked as `Inactive`",
                                     color=discord.Color.red()
                                     )
         for ticket in TICKETS:

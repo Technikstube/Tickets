@@ -43,7 +43,7 @@ class StartTicketModal(ui.Modal):
         tickets = Ticket().get()
         
         if str(interaction.user.id) in tickets:
-            await interaction.response.send_message("Du hast bereits ein Ticket.", ephemeral=True, delete_after=3)
+            await interaction.response.send_message("You already have a ticket open.", ephemeral=True, delete_after=3)
             return
         
         category = interaction.guild.get_channel(int(conf["ticket_category"])) if "ticket_category" in conf else None
@@ -79,15 +79,15 @@ class StartTicketModal(ui.Modal):
         
         embed = discord.Embed(
             title="", 
-            description=f"## :ticket: Ticket von {interaction.user.name} \n**Begründung:** {self.reason.value}\n\n",
+            description=f"## :ticket: Ticket by {interaction.user.name} \n**Reason:** {self.reason.value}\n\n",
             colour=discord.Color.lighter_gray())
         
         with open(f"configuration/ticket-{interaction.user.name}-{interaction.user.id}.txt", "w", encoding="utf-8") as f:
             date = datetime.now()
             f.write(
-                f"# Ticket erstellt am: {date.day}.{date.month}.{date.year}, {date.hour}:{date.minute}:{date.second}\n" \
-                f"# Grund: {self.reason.value}\n" \
-                f"# von: {interaction.user.name} ({interaction.user.id})\n\n" \
+                f"# Ticket created on: {date.day}.{date.month}.{date.year}, {date.hour}:{date.minute}:{date.second}\n" \
+                f"# Reason: {self.reason.value}\n" \
+                f"# by: {interaction.user.name} ({interaction.user.id})\n\n" \
                 f"{date.day}.{date.month}.{str(date.year)[2:]}, {date.hour}:{date.minute}:{date.second} | {interaction.user.name}: {self.first_message.value}\n"
             )
         
@@ -98,9 +98,9 @@ class StartTicketModal(ui.Modal):
         )
         user_embed.set_author(name=interaction.user.display_name, icon_url=interaction.user.avatar.url if interaction.user.avatar is not None else interaction.user.default_avatar.url)
         
-        await interaction.response.send_message(f"Ticket erstellt {channel.mention}", ephemeral=True, delete_after=15)
-        msg = await channel.send(f"<a:loading:1272649967936471202> | {interaction.user.mention} <@&1205201637577068605>")
-        await msg.edit(content=f"{interaction.user.mention} <@&1205201637577068605>", embed=embed, view=CloseView(self.bot, msg))
+        await interaction.response.send_message(f"Ticket created {channel.mention}", ephemeral=True, delete_after=15)
+        msg = await channel.send(f"<a:loading:1272649967936471202> | {interaction.user.mention}")
+        await msg.edit(content=f"{interaction.user.mention}", embed=embed, view=CloseView(self.bot, msg))
         await msg.pin()
         await channel.purge(limit=1)
         await channel.send(embed=user_embed)
@@ -109,5 +109,5 @@ class StartTicketModal(ui.Modal):
         self.stop()
     
     async def on_error(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Etwas ist schiefgelaufen! Versuche es später erneut...")
+        await interaction.response.send_message("Something went wrong, try it again later...")
         self.stop()

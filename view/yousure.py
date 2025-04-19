@@ -12,12 +12,12 @@ class YouSureView(ui.View):
         self.deletebutton = ui.Button(
             style=discord.ButtonStyle.danger,
             row=1,
-            label="Ticket löschen",
+            label="Close Ticket",
         )
         self.cancelbutton = ui.Button(
             style=discord.ButtonStyle.gray,
             row=1,
-            label="Abbrechen",
+            label="Cancel",
         )
         
         self.add_item(self.deletebutton)
@@ -33,7 +33,7 @@ class YouSureView(ui.View):
         
     async def interaction_check(self, interaction: discord.Interaction):
         if self.user != interaction.user.id:
-            await interaction.response.send_message("> :warning: Das ist nicht dein Menü.", ephemeral=True, delete_after=3)
+            await interaction.response.send_message("> :warning: This is not your menu.", ephemeral=True, delete_after=3)
             return False
         return True
         
@@ -56,19 +56,19 @@ class YouSureView(ui.View):
         await interaction.channel.delete()
         if member is not None:
             with open(f"configuration/{transcript}", "rb") as f:
-                embed = discord.Embed(title="", description=f"Dein Ticket wurde von {interaction.user.mention} geschlossen.", color=discord.Color.blue())
+                embed = discord.Embed(title="", description=f"Your Ticket was closed by {interaction.user.mention}.", color=discord.Color.blue())
                 await member.send(embed=embed, file=discord.File(f))
         if "transcript_channel" in conf:
             tc = self.bot.get_channel(int(conf["transcript_channel"]))
             with open(f"configuration/{transcript}", "rb") as f:
-                embed = discord.Embed(title="", description=f"{interaction.channel.name} wurde von {interaction.user.mention} geschlossen.", color=discord.Color.blue())
+                embed = discord.Embed(title="", description=f"{interaction.channel.name} was closed by {interaction.user.mention}.", color=discord.Color.blue())
                 await tc.send(embed=embed, file=discord.File(f))
             os.remove(f"./configuration/{transcript}")
         self.stop()
 
     async def cancel_callback(self, interaction: discord.Interaction):
         await self.original_message.delete_original_response()
-        await interaction.response.send_message("Vorgang abgebrochen...", ephemeral=True, delete_after=5)
+        await interaction.response.send_message("Action cancelled...", ephemeral=True, delete_after=5)
         self.stop()
         
     async def on_timeout(self):

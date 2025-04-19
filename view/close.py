@@ -15,7 +15,7 @@ class CloseView(ui.View):
             style=discord.ButtonStyle.gray,
             custom_id="close_ticket",
             row=1,
-            label="Ticket schließen",
+            label="Close Ticket",
         )
         self.archivebutton = ui.Button(
             style=discord.ButtonStyle.gray,
@@ -35,7 +35,7 @@ class CloseView(ui.View):
     async def close_callback(self, interaction: discord.Interaction):
         for ticket in Ticket().get():
             if Ticket().get_ticket_channel_id(ticket) == interaction.channel.id:
-                embed = discord.Embed(title="Ticket löschen", description="Bist du dir sicher das du das Ticket löschen möchtest?", color=discord.Color.red())
+                embed = discord.Embed(title="Delete Ticket", description="Are you sure you want to delete this ticket?", color=discord.Color.red())
                 await interaction.response.send_message(content="", embed=embed, view=YouSureView(self.bot, interaction.user.id, interaction, None), ephemeral=True)
                 self.stop()
                 return
