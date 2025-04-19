@@ -7,6 +7,16 @@ clone:
 
 steps:
 
+- name: clone
+  image: alpine/git
+  environment:
+    USERNAME:
+      from_secret: GIT_USERNAME
+    TOKEN:
+      from_secret: GIT_TOKEN
+  commands:
+    - git clone http://$USERNAME:$TOKEN@192.168.2.11/Technikstube/Tickets.git ./Tickets
+
 - name: build
   image: alpinelinux/docker-cli
   environment:
