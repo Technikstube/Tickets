@@ -46,9 +46,12 @@ steps:
     DOCKER_HOST: tcp://192.168.2.10:2375
     TOKEN:
       from_secret: tickets_token
+    TOKEN_2:
+      from_secret: boxsrv_ticket_token
   commands:
   - docker pull 192.168.2.10:5000/tickets:latest
   - docker run -d --name tickets --restart "unless-stopped" --network bridge -e "TOKEN"="$TOKEN" -v "tickets":"/configuration" 192.168.2.10:5000/tickets:latest
+  - docker run -d --name boxsrv_tickets --restart "unless-stopped" --network bridge -e "TOKEN"="$TOKEN_2" -v "tickets_boxsrv":"/configuration" 192.168.2.10:5000/tickets:latest
   when:
     event:
     - pull_request
