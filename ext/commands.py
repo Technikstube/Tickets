@@ -11,6 +11,8 @@ class Commands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot = bot
 
+    settings = app_commands.Group(name="settings", description="All Ticket-Settings in one place.", guild_only=True)
+
     @app_commands.command(name="close", description="Close a Ticket")
     @commands.guild_only()
     @app_commands.default_permissions(manage_nicknames=True)
@@ -38,29 +40,26 @@ class Commands(commands.Cog):
         await interaction.channel.send(embed=embed, view=StartTicketView(self.bot))
         await interaction.response.send_message("Message created!", ephemeral=True, delete_after=5)
 
-    @app_commands.command(name="set_role", description="Set the Staff Role")
+    @settings.command(name="staff_role", description="Set the Staff Role")
     @commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
-    async def staff_role_command(self, interaction: discord.Interaction, role_id: str):
+    async def staff_role_command(self, interaction: discord.Interaction, role: discord.Role):
         conf = Config().get()
         
-        if role_id == "unset":
-            conf["staff_role"] = None
-            Config().save(conf)
-            await interaction.response.send_message("Staff Role removed.", ephemeral=True)
+        if role.id == conf["staff_role"]:
+            await interaction.response.send_message("The Staff Role is not removable", ephemeral=True)
             return
         
-        _role = interaction.guild.get_role(int(role_id))
-        
-        if not isinstance(_role, discord.Role):
+        if not isinstance(role, discord.Role):
             await interaction.response.send_message("Given ID is not a role.", ephemeral=True)
+            return
         
-        conf["staff_role"] = role_id
+        conf["staff_role"] = role.id
         Config().save(conf)
         
-        await interaction.response.send_message(f"Staff-Role is now {_role.mention}.", ephemeral=True)
+        await interaction.response.send_message(f"Staff-Role is now {role.mention}.", ephemeral=True)
 
-    @app_commands.command(name="set_category", description="Set the Ticket-Category")
+    @settings.command(name="category", description="Set the Ticket-Category")
     @commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     async def category_command(self, interaction: discord.Interaction, category_id: str):
@@ -76,19 +75,19 @@ class Commands(commands.Cog):
         
         await interaction.response.send_message(f"Ticket-Category is now `{_chn.name}`.", ephemeral=True)
 
-    @app_commands.command(name="set_transcripts", description="Set the transcripts-channel")
+    @settings.command(name="transcripts", description="Set the Transcripts-Channel")
     @commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
-    async def transcript_command(self, interaction: discord.Interaction, transcript_channel: discord.TextChannel):
+    async def transcript_command(self, interaction: discord.Interaction, channel: discord.TextChannel):
         conf = Config().get()
         
-        if not isinstance(transcript_channel, discord.TextChannel):
+        if not isinstance(channel, discord.TextChannel):
             await interaction.response.send_message("Given ID is not a text channel.", ephemeral=True)
         
-        conf["transcript_channel"] = transcript_channel.id
+        conf["transcript_channel"] = channel.id
         Config().save(conf)
         
-        await interaction.response.send_message(f"Transcript-Channel is now {transcript_channel.mention}.", ephemeral=True)
+        await interaction.response.send_message(f"Transcript-Channel is now {channel.mention}.", ephemeral=True)
     
 async def setup(bot):
     await bot.add_cog(Commands(bot))

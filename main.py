@@ -10,9 +10,9 @@ from datetime import datetime
 from discord.ext import commands, tasks
 
 from utility import Ticket, Config
+from helper.transcript import Transcript
 from view.close import CloseView
 from view.start_ticket import StartTicketView
-from modal.start_ticket import StartTicketModal
 
 sentry_sdk.init("http://ca1217fce7644447860bace472887020@192.168.2.99:8000/3")
 
@@ -66,7 +66,7 @@ class Tickets(commands.Bot):
                     os.remove(f"./configuration/{transcript}")
                 continue
     
-    @tasks.loop(minutes=1.1)
+    @tasks.loop(minutes=1)
     async def inactive_marker(self):
         TICKETS = Ticket().get() # One List that doesnt change, so that the for loop doesnt break lol.
         tickets = Ticket().get()
@@ -83,20 +83,23 @@ class Tickets(commands.Bot):
                 if tickets[str(ticket)]["stale"] is True:
                     continue
                 tickets[str(ticket)]["stale"] = True
+                Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system("Ticket was marked as INACTIVE.")
                 Ticket().save(tickets)
                 await channel.send(embed=stale_embed)
-
                 await channel.edit(name=channel.name.replace("ticket", "inactive"))
                 await channel.move(end=True)
                 continue
 
-    @tasks.loop(minutes=60.1)
+    @tasks.loop(minutes=60)
     async def presence_tick(self):
         choices: discord.Activity or discord.CustomActivity = [
             discord.Activity(
                 type=discord.ActivityType.watching, name="Tickets"
             ),
-            discord.CustomActivity(name="Writing Transcripts")
+            discord.CustomActivity(name="Writing Transcripts"),
+            discord.Activity(
+                type=discord.ActivityType.watching, name="Boxes"
+            )
         ]
 
         await self.change_presence(
@@ -106,12 +109,20 @@ class Tickets(commands.Bot):
     async def setup_hook(self):
         self.add_view(CloseView(self))
         self.add_view(StartTicketView(self))
+        
+        if not os.path.exists("configuration/configuration.json"):
+            with open("configuration/configuration.json", "w") as f:
+                f.write("{}")
+        
+        if not os.path.exists("configuration/tickets.json"):
+            with open("configuration/tickets.json", "w") as f:
+                f.write("{}")
     
     async def on_connect(self):
         choices: discord.Activity or discord.CustomActivity = [
             discord.CustomActivity(name="¯\\_(ツ)_/¯")
         ]
-
+        
         await self.change_presence(
             activity=random.choice(choices), status=discord.Status.dnd
         )

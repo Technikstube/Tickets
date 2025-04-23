@@ -5,11 +5,12 @@ from discord import ui
 
 from utility import Ticket, Config
 from view.close import CloseView
+from helper.transcript import Transcript
 
 class StartTicketModal(ui.Modal):
     def __init__(self, bot: commands.Bot):
         super().__init__(
-            title="Ticket öffnen",
+            title="Ticket Overview",
             timeout=None,
             custom_id="open_ticket"
         )
@@ -17,20 +18,20 @@ class StartTicketModal(ui.Modal):
         self.start = round(datetime.now().timestamp())
         self.bot: commands.Bot = bot
         self.reason = ui.TextInput(
-            label="Begründung",
+            label="Reason",
             style=discord.TextStyle.short,
             min_length=4,
             max_length=64,
-            placeholder="Deine Begründung...",
+            placeholder="Reason...",
             required=True,
             row=0
         )
         self.first_message = ui.TextInput(
-            label="Nachricht",
+            label="Issue",
             style=discord.TextStyle.paragraph,
             min_length=16,
             max_length=4000,
-            placeholder="Zur schnelleren Bearbeitung kannst du hier dein Anliegen bereits beschreiben.",
+            placeholder="For a faster Response from our Support-Team, you can already write your issue here.",
             required=True,
             row=1
         )
@@ -58,6 +59,10 @@ class StartTicketModal(ui.Modal):
         standard_overwrite.send_messages = True
         standard_overwrite.read_messages = False
         
+        if staff is None:
+            await interaction.response.send_message("There is no staff-role set, please contact staff.", ephemeral=True)
+            return
+        
         channel = await guild.create_text_channel(
             name=f"ticket-{user.name}",
             category=category,
@@ -82,14 +87,7 @@ class StartTicketModal(ui.Modal):
             description=f"## :ticket: Ticket by {interaction.user.name} \n**Reason:** {self.reason.value}\n\n",
             colour=discord.Color.lighter_gray())
         
-        with open(f"configuration/ticket-{interaction.user.name}-{interaction.user.id}.txt", "w", encoding="utf-8") as f:
-            date = datetime.now()
-            f.write(
-                f"# Ticket created on: {date.day}.{date.month}.{date.year}, {date.hour}:{date.minute}:{date.second}\n" \
-                f"# Reason: {self.reason.value}\n" \
-                f"# by: {interaction.user.name} ({interaction.user.id})\n\n" \
-                f"{date.day}.{date.month}.{str(date.year)[2:]}, {date.hour}:{date.minute}:{date.second} | {interaction.user.name}: {self.first_message.value}\n"
-            )
+        Transcript(f"configuration/ticket-{interaction.user.name}-{interaction.user.id}.txt").create(interaction.user, self.reason.value, self.first_message.value)
         
         user_embed = discord.Embed(
             title="",
@@ -100,10 +98,10 @@ class StartTicketModal(ui.Modal):
         
         await interaction.response.send_message(f"Ticket created {channel.mention}", ephemeral=True, delete_after=15)
         msg = await channel.send(f"<a:loading:1272649967936471202> | {interaction.user.mention}")
-        await msg.edit(content=f"{interaction.user.mention}", embed=embed, view=CloseView(self.bot, msg))
+        await msg.edit(content=f"{interaction.user.mention}", embed=embed)
         await msg.pin()
         await channel.purge(limit=1)
-        await channel.send(embed=user_embed)
+        await channel.send(embed=user_embed, view=CloseView(self.bot, msg))
     
     def on_timeout(self):
         self.stop()

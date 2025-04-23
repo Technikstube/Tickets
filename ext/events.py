@@ -4,6 +4,7 @@ from datetime import datetime
 from discord.ext import commands
 
 from utility import Ticket, Config
+from helper.transcript import Transcript
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -27,17 +28,14 @@ class Events(commands.Cog):
         if channel is None:
             return
         
-        with open(f"configuration/{tickets[str(ticket)].get("transcript")}", "a") as f:
-            date = datetime.now()
-            f.write(
-                f"{date.day}.{date.month}.{str(date.year)[2:]}, {date.hour}:{date.minute}:{date.second} | {message.author.name}: {message.content}\n"
-            )
-            
         tickets[str(ticket)]["last_activity"] = datetime.now().timestamp()
         if tickets[str(ticket)]["stale"] is True:
             tickets[str(ticket)]["stale"] = False
+            Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system("Ticket was marked as ACTIVE.")
             await channel.edit(name=channel.name.replace("inactive", "ticket"))
             await channel.move(beginning=True)
+        
+        Transcript(f"configuration/{tickets[str(ticket)].get("transcript")}").append(message.author, message.content)
         Ticket().save(tickets)
         
     @commands.Cog.listener(name="on_message_edit")
@@ -58,11 +56,7 @@ class Events(commands.Cog):
         if channel is None:
             return
         
-        with open(f"configuration/{tickets[str(ticket)].get("transcript")}", "a") as f:
-            date = datetime.now()
-            f.write(
-                f"{date.day}.{date.month}.{str(date.year)[2:]}, {date.hour}:{date.minute}:{date.second} | [Edited] {after.author.name}: {after.content}\n    before: {before.content}\n"
-            )
+        Transcript(f"configuration/{tickets[str(ticket)].get("transcript")}").append_edited(after.author, before.content, after.content)
                     
     @commands.Cog.listener(name="on_member_remove")
     async def on_member_remove(self, member: discord.Member):

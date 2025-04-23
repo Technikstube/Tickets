@@ -68,7 +68,7 @@ class YouSureView(ui.View):
 
     async def cancel_callback(self, interaction: discord.Interaction):
         await self.original_message.delete_original_response()
-        await interaction.response.send_message("Action cancelled...", ephemeral=True, delete_after=5)
+        await interaction.response.send_message("Cancelled...", ephemeral=True, delete_after=5)
         self.stop()
         
     async def on_timeout(self):
