@@ -24,7 +24,7 @@ paths = [
     "ext/"
 ]
 
-MAXIMUM_INACTIVE_SECONDS = 10800 # 3 hours in seconds
+MAXIMUM_INACTIVE_SECONDS = 21600 # 6 hours in seconds
 
 class Tickets(commands.Bot):
     def __init__(self):
@@ -34,7 +34,7 @@ class Tickets(commands.Bot):
             intents=intents
         )
     
-    @tasks.loop(hours=12.1)
+    @tasks.loop(hours=24.1)
     async def purge_inactive_tickets(self):
         TICKETS = Ticket().get() # One List that doesnt change, so that the for loop doesnt break lol.
         tickets = Ticket().get()
@@ -66,7 +66,7 @@ class Tickets(commands.Bot):
                     os.remove(f"./configuration/{transcript}")
                 continue
     
-    @tasks.loop(minutes=1)
+    @tasks.loop(hours=12.1)
     async def inactive_marker(self):
         TICKETS = Ticket().get() # One List that doesnt change, so that the for loop doesnt break lol.
         tickets = Ticket().get()
@@ -90,7 +90,7 @@ class Tickets(commands.Bot):
                 await channel.move(end=True)
                 continue
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(hours=2)
     async def presence_tick(self):
         choices: discord.Activity or discord.CustomActivity = [
             discord.Activity(
