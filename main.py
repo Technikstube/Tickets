@@ -130,8 +130,8 @@ class Tickets(commands.Bot):
     async def on_ready(self):
         
         self.presence_tick.start()
-        self.purge_inactive_tickets.start()
-        self.inactive_marker.start()
+        #self.purge_inactive_tickets.start()
+        #self.inactive_marker.start()
         
         for path in paths:
             for file in os.listdir(path):
