@@ -33,9 +33,9 @@ class Commands(commands.Cog):
         embed = discord.Embed(
             color=discord.Color.blue(),
             title="",
-            description="Click on **`Open Ticket`** to open a ticket!"
+            description="Click on **`Submit Ticket`** to submit a ticket!"
         )
-        embed.set_author(name="Open a Ticket", icon_url=self.bot.user.avatar.url)
+        embed.set_author(name="Submit a Ticket", icon_url=self.bot.user.avatar.url)
         
         await interaction.channel.send(embed=embed, view=StartTicketView(self.bot))
         await interaction.response.send_message("Message created!", ephemeral=True, delete_after=5)

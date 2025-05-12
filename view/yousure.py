@@ -3,6 +3,7 @@ import os
 from discord import ui
 
 from utility import Ticket, Config
+from helper.transcript import Transcript
 
 class YouSureView(ui.View):
     def __init__(self, bot, user_id: int, message: discord.Interaction, reason: str | None=None):
@@ -12,7 +13,7 @@ class YouSureView(ui.View):
         self.deletebutton = ui.Button(
             style=discord.ButtonStyle.danger,
             row=1,
-            label="Close Ticket",
+            label="Resolve & Delete",
         )
         self.cancelbutton = ui.Button(
             style=discord.ButtonStyle.gray,
@@ -48,6 +49,7 @@ class YouSureView(ui.View):
         transcript = ""
         for ticket in tickets:
             if Ticket().get_ticket_channel_id(ticket) == interaction.channel.id:
+                Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system(f"{interaction.user.name} marked this Ticket as Resolved")
                 transcript = Ticket().get()[str(ticket)].get("transcript")
                 member = interaction.guild.get_member(int(ticket))
                 tickets.pop(ticket)
@@ -56,18 +58,28 @@ class YouSureView(ui.View):
         await interaction.channel.delete()
         if member is not None:
             with open(f"configuration/{transcript}", "rb") as f:
-                embed = discord.Embed(title="", description=f"Your Ticket was closed by {interaction.user.mention}.", color=discord.Color.blue())
+                embed = discord.Embed(title="", description=f"Your Ticket was resolved by {interaction.user.mention}.", color=discord.Color.blue())
                 await member.send(embed=embed, file=discord.File(f))
         if "transcript_channel" in conf:
             tc = self.bot.get_channel(int(conf["transcript_channel"]))
             with open(f"configuration/{transcript}", "rb") as f:
-                embed = discord.Embed(title="", description=f"{interaction.channel.name} was closed by {interaction.user.mention}.", color=discord.Color.blue())
+                embed = discord.Embed(title="", description=f"{interaction.channel.name} was resolved by {interaction.user.mention}.", color=discord.Color.blue())
                 await tc.send(embed=embed, file=discord.File(f))
             os.remove(f"./configuration/{transcript}")
         self.stop()
 
     async def cancel_callback(self, interaction: discord.Interaction):
         await self.original_message.delete_original_response()
+        
+        tickets = Ticket().get()
+        
+        for ticket in Ticket().get():
+            if Ticket().get_ticket_channel_id(ticket) == interaction.channel.id:
+                t = tickets
+                t[str(ticket)]["stale"] = False
+                Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system(f"{interaction.user.name} marked this ticket as Unresolved (Active)")
+                Ticket().save(t)
+        
         await interaction.response.send_message("Cancelled...", ephemeral=True, delete_after=5)
         self.stop()
         

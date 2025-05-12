@@ -14,7 +14,7 @@ class StartTicketView(ui.View):
             emoji="<:helioscheckcircle:1267515445582237797>",
             custom_id="open_ticket",
             row=0,
-            label="Open Ticket",
+            label="Submit Ticket",
         )
         
         self.add_item(self.startbutton)

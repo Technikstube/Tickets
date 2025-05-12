@@ -31,9 +31,7 @@ class Events(commands.Cog):
         tickets[str(ticket)]["last_activity"] = datetime.now().timestamp()
         if tickets[str(ticket)]["stale"] is True:
             tickets[str(ticket)]["stale"] = False
-            Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system("Ticket was marked as ACTIVE.")
-            await channel.edit(name=channel.name.replace("inactive", "ticket"))
-            await channel.move(beginning=True)
+            Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system("Ticket was marked as Active.")
         
         Transcript(f"configuration/{tickets[str(ticket)].get("transcript")}").append(message.author, message.content)
         Ticket().save(tickets)
