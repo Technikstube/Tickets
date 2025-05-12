@@ -60,7 +60,10 @@ class YouSureView(ui.View):
         if member is not None:
             with open(f"configuration/{transcript}", "rb") as f:
                 embed = discord.Embed(title="", description=f"Your Ticket was resolved by {interaction.user.mention}.", color=discord.Color.blue())
-                await member.send(embed=embed, file=discord.File(f))
+                try:
+                    await member.send(embed=embed, file=discord.File(f))
+                except discord.Forbidden:
+                    pass                
         if "transcript_channel" in conf:
             tc = self.bot.get_channel(int(conf["transcript_channel"]))
             with open(f"configuration/{transcript}", "rb") as f:
