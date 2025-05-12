@@ -46,10 +46,6 @@ class Commands(commands.Cog):
     async def staff_role_command(self, interaction: discord.Interaction, role: discord.Role):
         conf = Config().get()
         
-        if role.id == conf["staff_role"]:
-            await interaction.response.send_message("The Staff Role is not removable", ephemeral=True)
-            return
-        
         if not isinstance(role, discord.Role):
             await interaction.response.send_message("Given ID is not a role.", ephemeral=True)
             return
