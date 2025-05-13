@@ -1,11 +1,10 @@
 import discord
-from datetime import datetime
-from discord.ext import commands
 from discord import ui
+from discord.ext import commands
+from datetime import datetime
 
-from utility import Ticket, Config
-from view.close import CloseView
-from helper.transcript import Transcript
+from utility import Ticket, Config, Transcript
+from ui.view import CloseView
 
 class StartTicketModal(ui.Modal):
     def __init__(self, bot: commands.Bot):
@@ -15,7 +14,6 @@ class StartTicketModal(ui.Modal):
             custom_id="open_ticket"
         )
         
-        self.start = round(datetime.now().timestamp())
         self.bot: commands.Bot = bot
         self.reason = ui.TextInput(
             label="Reason",
@@ -30,6 +28,7 @@ class StartTicketModal(ui.Modal):
             label="Minecraft Name",
             style=discord.TextStyle.short,
             placeholder="Please provide your Minecraft name",
+            max_length=32,
             required=False,
             row=1
         )
@@ -52,7 +51,8 @@ class StartTicketModal(ui.Modal):
         tickets = Ticket().get()
         
         if str(interaction.user.id) in tickets:
-            await interaction.response.send_message("You can only have a maximum of 1 Ticket", ephemeral=True, delete_after=3)
+            _chn = self.bot.get_channel(int(tickets[str(interaction.user.id)]["channel"]))
+            await interaction.response.send_message(f"You still have a ticket open. See here: {_chn.mention}", ephemeral=True, delete_after=3)
             return
         
         category = interaction.guild.get_channel(int(conf["ticket_category"])) if "ticket_category" in conf else None
@@ -60,16 +60,21 @@ class StartTicketModal(ui.Modal):
         guild = interaction.guild
         user = interaction.user
         
-        overwrite = discord.PermissionOverwrite()
-        overwrite.read_messages = True
-        
-        standard_overwrite = discord.PermissionOverwrite()
-        standard_overwrite.send_messages = True
-        standard_overwrite.read_messages = False
-        
         if staff is None:
             await interaction.response.send_message("Something went wrong, please contact an administrator [Staff-Role missing].", ephemeral=True)
             return
+        
+        if category is None:
+            await interaction.response.send_message("Something went wrong, please contact an administrator [Category missing].", ephemeral=True)
+            return
+        
+        overwrite = discord.PermissionOverwrite()
+        default_overwrite = discord.PermissionOverwrite()
+        
+        overwrite.read_messages = True
+        
+        default_overwrite.send_messages = True
+        default_overwrite.read_messages = False
         
         channel = await guild.create_text_channel(
             name=f"ticket-{user.name}",
@@ -77,10 +82,11 @@ class StartTicketModal(ui.Modal):
             overwrites={
                 user: overwrite,
                 staff: overwrite,
-                guild.default_role: standard_overwrite
+                guild.default_role: default_overwrite
             }
             )
-        await channel.move(beginning=True)
+        
+        await interaction.response.send_message(f"Ticket created {channel.mention}", ephemeral=True, delete_after=15)
         
         tickets[str(interaction.user.id)] = {
             "channel": channel.id,
@@ -90,6 +96,7 @@ class StartTicketModal(ui.Modal):
             "transcript": f"ticket-{interaction.user.name}-{interaction.user.id}.txt"
         }
         Ticket().save(tickets)
+        Transcript(f"configuration/ticket-{interaction.user.name}-{interaction.user.id}.txt").create(interaction.user, self.reason.value, self.first_message.value)
         
         username = self.ingame_username.value
         
@@ -101,8 +108,6 @@ class StartTicketModal(ui.Modal):
             description=f"## :ticket: Ticket by {interaction.user.name} \n**Reason:** {self.reason.value}\n**Minecraft Name:** {username}\n\n",
             colour=discord.Color.lighter_gray())
         
-        Transcript(f"configuration/ticket-{interaction.user.name}-{interaction.user.id}.txt").create(interaction.user, self.reason.value, self.first_message.value)
-        
         user_embed = discord.Embed(
             title="",
             description=self.first_message.value,
@@ -110,16 +115,14 @@ class StartTicketModal(ui.Modal):
         )
         user_embed.set_author(name=interaction.user.display_name, icon_url=interaction.user.avatar.url if interaction.user.avatar is not None else interaction.user.default_avatar.url)
         
-        await interaction.response.send_message(f"Ticket created {channel.mention}", ephemeral=True, delete_after=15)
-        msg = await channel.send(f"<a:loading:1272649967936471202> | {interaction.user.mention}")
-        await msg.edit(content=f"{interaction.user.mention}", embed=embed)
+        msg = await channel.send(content=f"{interaction.user.mention}", embed=embed)
+        await channel.send(embed=user_embed, view=CloseView(self.bot, msg))
         await msg.pin()
         await channel.purge(limit=1)
-        await channel.send(embed=user_embed, view=CloseView(self.bot, msg))
-    
+        
     def on_timeout(self):
         self.stop()
     
-    async def on_error(self, interaction: discord.Interaction):
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
         await interaction.response.send_message("Something went wrong, try it again later...")
         self.stop()

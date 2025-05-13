@@ -1,8 +1,8 @@
 import discord
-from typing import Optional
 from discord import ui
+from typing import Optional
 
-from view.yousure import YouSureView
+from ui.view.yousure import YouSureView
 from utility import Ticket
 
 class CloseView(ui.View):
@@ -10,6 +10,7 @@ class CloseView(ui.View):
         super().__init__(
             timeout=None
         )
+        
         self.bot = bot
         self.closebutton = ui.Button(
             style=discord.ButtonStyle.gray,
@@ -33,5 +34,9 @@ class CloseView(ui.View):
                 self.stop()
                 return
         await interaction.response.send_message(content="Something went wrong, contact an administrator to delete this Ticket.", ephemeral=True, delete_after=3)
-        
-        
+    
+    async def on_timeout(self):
+        pass
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
+        await interaction.response.send_message(content="Something went wrong, please try again or contact the staff", ephemeral=True)

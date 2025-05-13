@@ -5,12 +5,10 @@ import asyncio
 import signal
 import sentry_sdk
 import random
-from dotenv import get_key
 from discord.ext import commands, tasks
+from dotenv import get_key
 
-from view.close import CloseView
-from view.start_ticket import StartTicketView
-from view.inactive import InactiveView
+from ui.view import StartTicketView, CloseView
 
 sentry_sdk.init("http://ca1217fce7644447860bace472887020@192.168.2.99:8000/3")
 
@@ -47,10 +45,9 @@ class Tickets(commands.Bot):
         )
 
     async def setup_hook(self):
-        self.add_view(CloseView(self))
         self.add_view(StartTicketView(self))
-        self.add_view(InactiveView(self))
-        
+        self.add_view(CloseView(self))
+                
         if not os.path.exists("configuration/configuration.json"):
             with open("configuration/configuration.json", "w") as f:
                 f.write("{}")

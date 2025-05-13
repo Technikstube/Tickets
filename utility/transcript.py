@@ -1,6 +1,6 @@
-from datetime import datetime
 import discord
 import pytz
+from datetime import datetime
 
 MESSAGE = "{} | {}{}: {}\n"
 

@@ -3,13 +3,12 @@ import os
 from discord import ui
 from datetime import datetime
 
-from utility import Ticket, Config
-from helper.transcript import Transcript
+from utility import Ticket, Config, Transcript
 
 class YouSureView(ui.View):
     def __init__(self, bot, user_id: int, message: discord.Interaction, reason: str | None=None):
         super().__init__(
-            timeout=60
+            timeout=120
         )
         self.deletebutton = ui.Button(
             style=discord.ButtonStyle.danger,
@@ -48,22 +47,25 @@ class YouSureView(ui.View):
         tickets = Ticket().get()
         conf = Config().get()
         transcript = ""
+        
         for ticket in tickets:
             if Ticket().get_ticket_channel_id(ticket) == interaction.channel.id:
                 Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system(f"{interaction.user.name} marked this Ticket as Resolved")
                 transcript = Ticket().get()[str(ticket)].get("transcript")
                 member = interaction.guild.get_member(int(ticket))
+                await interaction.channel.delete()
                 tickets.pop(ticket)
                 break
         Ticket().save(tickets)
-        await interaction.channel.delete()
+        
         if member is not None:
             with open(f"configuration/{transcript}", "rb") as f:
                 embed = discord.Embed(title="", description=f"Your Ticket was resolved by {interaction.user.mention}.", color=discord.Color.blue())
                 try:
                     await member.send(embed=embed, file=discord.File(f))
                 except discord.Forbidden:
-                    pass                
+                    pass   
+
         if "transcript_channel" in conf:
             tc = self.bot.get_channel(int(conf["transcript_channel"]))
             with open(f"configuration/{transcript}", "rb") as f:
@@ -81,8 +83,8 @@ class YouSureView(ui.View):
             if Ticket().get_ticket_channel_id(ticket) == interaction.channel.id:
                 t = tickets
                 t[str(ticket)]["stale"] = False
-                tickets[str(ticket)]["stale_notified"] = False
                 t[str(ticket)]["last_activity"] = datetime.now().timestamp()
+                tickets[str(ticket)]["stale_notified"] = False
                 Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system(f"{interaction.user.name} marked this ticket as Unresolved (Active)")
                 Ticket().save(t)
         
@@ -93,3 +95,5 @@ class YouSureView(ui.View):
         await self.original_message.delete_original_response()
         self.stop()
         
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
+        await interaction.response.send_message(content="Something went wrong, please try again or contact the staff", ephemeral=True)

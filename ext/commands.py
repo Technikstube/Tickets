@@ -1,11 +1,11 @@
 import discord
-from typing import Optional
-from discord.ext import commands
 from discord import app_commands
+from discord.ext import commands
+
+from typing import Optional
 
 from utility import Ticket, Config
-from view.yousure import YouSureView
-from view.start_ticket import StartTicketView
+from ui.view import StartTicketView, YouSureView
 
 class Commands(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -25,7 +25,7 @@ class Commands(commands.Cog):
 
         await interaction.response.send_message("This channel is not a ticket.", ephemeral=True, delete_after=3)
 
-    @app_commands.command(name="send_ticket_message", description="Send the Ticket Message")
+    @app_commands.command(name="send", description="Send the Ticket Message")
     @commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     async def send_message_command(self, interaction: discord.Interaction):
@@ -40,7 +40,7 @@ class Commands(commands.Cog):
         await interaction.channel.send(embed=embed, view=StartTicketView(self.bot))
         await interaction.response.send_message("Message created!", ephemeral=True, delete_after=5)
 
-    @settings.command(name="staff_role", description="Set the Staff Role")
+    @settings.command(name="role", description="Set the Staff Role")
     @commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     async def staff_role_command(self, interaction: discord.Interaction, role: discord.Role):
@@ -71,7 +71,7 @@ class Commands(commands.Cog):
         
         await interaction.response.send_message(f"Ticket-Category is now `{_chn.name}`.", ephemeral=True)
 
-    @settings.command(name="transcripts", description="Set the Transcripts-Channel")
+    @settings.command(name="transcript", description="Set the Transcripts-Channel")
     @commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     async def transcript_command(self, interaction: discord.Interaction, channel: discord.TextChannel):

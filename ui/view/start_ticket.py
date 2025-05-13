@@ -1,7 +1,7 @@
 import discord
 from discord import ui
 
-from modal.start_ticket import StartTicketModal
+from ui.modal import StartTicketModal
 
 class StartTicketView(ui.View):
     def __init__(self, bot):
@@ -23,3 +23,9 @@ class StartTicketView(ui.View):
         
     async def start_callback(self, interaction: discord.Interaction):        
         await interaction.response.send_modal(StartTicketModal(self.bot))
+        
+    async def on_timeout(self):
+        pass
+            
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
+        await interaction.response.send_message(content="Something went wrong, please try again or contact the staff", ephemeral=True)

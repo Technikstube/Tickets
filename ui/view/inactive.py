@@ -1,17 +1,17 @@
 import discord
-from typing import Optional
 from discord import ui
+from typing import Optional
 from datetime import datetime
 
-from view.yousure import YouSureView
-from utility import Ticket
-from helper.transcript import Transcript
+from ui.view.yousure import YouSureView
+from utility import Ticket, Transcript
 
 class InactiveView(ui.View):
     def __init__(self, bot, message: Optional[discord.Message]=None):
         super().__init__(
-            timeout=None
+            timeout=57600
         )
+        
         self.bot = bot
         self.closebutton = ui.Button(
             style=discord.ButtonStyle.green,
@@ -50,6 +50,8 @@ class InactiveView(ui.View):
     async def keep_callback(self, interaction: discord.Interaction):
         tickets = Ticket().get()
         
+        embed = discord.Embed(title="", description=f"**Ticket marked as `Not Resolved` by {interaction.user.name}**", color=discord.Color.light_gray()) 
+        
         for ticket in Ticket().get():
             if Ticket().get_ticket_channel_id(ticket) == interaction.channel.id:
                 t = tickets
@@ -58,7 +60,19 @@ class InactiveView(ui.View):
                 t[str(ticket)]["last_activity"] = datetime.now().timestamp()
                 Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system(f"{interaction.user.name} marked this ticket as Unresolved (Active)")
                 if self.original_message:
-                    await self.original_message.delete()
+                    await self.original_message.edit(content="", embed=embed, view=None)
+                else:
+                    await interaction.response.send_message(content="", embed=embed)
                 self.stop()
                 Ticket().save(t)
                 return
+            
+    async def on_timeout(self):
+        self.keepbutton.disabled = True
+        self.closebutton.disabled = True
+        if self.original_message:
+            await self.original_message.edit(view=self)
+        self.stop()
+            
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
+        await interaction.response.send_message(content="Something went wrong, please try again or contact the staff", ephemeral=True)

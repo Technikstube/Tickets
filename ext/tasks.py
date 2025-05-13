@@ -1,10 +1,9 @@
 import discord
-from datetime import datetime
 from discord.ext import commands, tasks
+from datetime import datetime
 
-from utility import Ticket
-from helper.transcript import Transcript
-from view.inactive import InactiveView
+from utility import Ticket, Transcript
+from ui.view import InactiveView
 
 MAXIMUM_INACTIVE_SECONDS = 21600 # 6 hours in seconds
 
@@ -51,7 +50,6 @@ class Tasks(commands.Cog):
                 continue
     
 async def setup(bot):
-    
     await bot.add_cog(Tasks(bot))
     print(f"> {__name__} loaded")
     
