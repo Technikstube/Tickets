@@ -86,6 +86,7 @@ class StartTicketModal(ui.Modal):
             "channel": channel.id,
             "last_activity": datetime.now().timestamp(),
             "stale": False,
+            "stale_notified": False,
             "transcript": f"ticket-{interaction.user.name}-{interaction.user.id}.txt"
         }
         Ticket().save(tickets)

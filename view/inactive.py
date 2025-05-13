@@ -54,6 +54,7 @@ class InactiveView(ui.View):
             if Ticket().get_ticket_channel_id(ticket) == interaction.channel.id:
                 t = tickets
                 t[str(ticket)]["stale"] = False
+                tickets[str(ticket)]["stale_notified"] = False
                 t[str(ticket)]["last_activity"] = datetime.now().timestamp()
                 Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system(f"{interaction.user.name} marked this ticket as Unresolved (Active)")
                 if self.original_message:

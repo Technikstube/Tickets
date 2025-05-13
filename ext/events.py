@@ -31,6 +31,7 @@ class Events(commands.Cog):
         tickets[str(ticket)]["last_activity"] = datetime.now().timestamp()
         if tickets[str(ticket)]["stale"] is True:
             tickets[str(ticket)]["stale"] = False
+            tickets[str(ticket)]["stale_notified"] = False
             Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system("Ticket was marked as Active.")
         
         Transcript(f"configuration/{tickets[str(ticket)].get("transcript")}").append(message.author, message.content)

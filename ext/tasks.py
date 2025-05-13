@@ -36,16 +36,18 @@ class Tasks(commands.Cog):
                                     color=discord.Color.orange()
                                     )
             
-            if tickets[str(ticket)]["stale"]:
-                msg = await channel.send(content=f"{submitter.mention}", embed=stale_embed)
-                await msg.edit(view=InactiveView(self.bot, msg))
-                continue
             if dist >= MAXIMUM_INACTIVE_SECONDS:
                 tickets[str(ticket)]["stale"] = True
                 Transcript(f"configuration/{tickets[str(ticket)]["transcript"]}").append_as_system("Ticket was marked as Inactive.")
+                if tickets[str(ticket)]["stale_notified"] is False:
+                    msg = await channel.send(content=f"{submitter.mention}", embed=stale_embed)
+                    await msg.edit(view=InactiveView(self.bot, msg))
+                    tickets[str(ticket)]["stale_notified"] = True
+                else:
+                    msg = await channel.send(content="", embed=stale_embed)
+                    await msg.edit(view=InactiveView(self.bot, msg))
+                    tickets[str(ticket)]["stale_notified"] = False
                 Ticket().save(tickets)
-                msg = await channel.send(content=f"{submitter.mention}", embed=stale_embed)
-                await msg.edit(view=InactiveView(self.bot, msg))
                 continue
     
 async def setup(bot):
