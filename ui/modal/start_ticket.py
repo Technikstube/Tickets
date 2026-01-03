@@ -24,14 +24,6 @@ class StartTicketModal(ui.Modal):
             required=True,
             row=0
         )
-        self.ingame_username = ui.TextInput(
-            label="Minecraft Name",
-            style=discord.TextStyle.short,
-            placeholder="Please provide your Minecraft name",
-            max_length=32,
-            required=False,
-            row=1
-        )
         self.first_message = ui.TextInput(
             label="Issue",
             style=discord.TextStyle.paragraph,
@@ -43,7 +35,6 @@ class StartTicketModal(ui.Modal):
         )
         
         self.add_item(self.reason)
-        self.add_item(self.ingame_username)
         self.add_item(self.first_message)
         
     async def on_submit(self, interaction: discord.Interaction):        
@@ -98,14 +89,9 @@ class StartTicketModal(ui.Modal):
         Ticket().save(tickets)
         Transcript(f"configuration/ticket-{interaction.user.name}-{interaction.user.id}.txt").create(interaction.user, self.reason.value, self.first_message.value)
         
-        username = self.ingame_username.value
-        
-        if len(username) == 0:
-            username = "Not provided"
-        
         embed = discord.Embed(
             title="", 
-            description=f"## :ticket: Ticket by {interaction.user.name} \n**Reason:** {self.reason.value}\n**Minecraft Name:** {username}\n\n",
+            description=f"## :ticket: Ticket by {interaction.user.name} \n**Reason:** {self.reason.value}\n\n",
             colour=discord.Color.lighter_gray())
         
         user_embed = discord.Embed(
